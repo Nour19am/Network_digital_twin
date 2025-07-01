@@ -9,4 +9,5 @@ dependencies:
   - pandas
   - conda-forge::scapy
   - conda-forge::pyshark
+  - scipy
 prefix: /home/nourhen_dev/miniconda3/envs/centroid-env
