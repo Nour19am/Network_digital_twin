@@ -4,6 +4,8 @@ This repository contains multiple directories, each of which encompasses a C++ f
 Each folder has a README.md file explaining the setup of the experiment. Comments in the beginning of each C++ simulation file give more insight into topology, subnetwork IP addresses, traffic generated and other features for a more understandable code.
 The simulations in each folder enable to trace the progression of the experiment in order to establish realistic traffic scenarios for data acquisition. The main point is to be able to confirm a setup and build upon it by adding a necessary complexity.
 
+You can recreate the conda environment with the installed dependencies using the environment.yml file to use the python notebooks for data exploration, ML application and more...
+
 
 To be done/redone:
 - add mobility model (stationary) for the static simulations to avoid printing warning issued by the animation add-ons (disable the animation tracing for now to avoid this problem as it works fine without it)
