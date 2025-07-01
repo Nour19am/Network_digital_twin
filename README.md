@@ -6,7 +6,7 @@ The simulations in each folder enable to trace the progression of the experiment
 
 
 To be done/redone:
-- add mobility model (stationary) for the static simulations to avoid printing warning issued by the animation add-ons
+- add mobility model (stationary) for the static simulations to avoid printing warning issued by the animation add-ons (disable the animation tracing for now to avoid this problem as it works fine without it)
 - adjust the code to avoid the "Max packets per trace file exceeded" (disable the animation tracing for now to avoid this problem as it works fine without it)
 - add logs
 - enable command line variable input for more flexibility
