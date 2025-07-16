@@ -1,6 +1,6 @@
 Based on traffic-control.cc provided in ns3's repo under example/traffic-control/ directory, we adapted and created those files:
-- n-dscp_test_unique.cc generates traffic through a socket attached to a TOS between 2 nodes
-- n-dscp_test_unique.cc creates 3 sockets attached to 3 different TOS between 2 nodes to use prioirty queues.
+- n-dscp_test_unique.cc generates traffic through one socket attached to a TOS between 2 nodes (one flow)
+- n-dscp_test_mflow.cc creates 3 sockets attached to 3 different TOS between 2 nodes to use prioirty queues (3 different flows)
 
 Next: Add flow monitor and traces to:
 - check DSCP marks per socket
