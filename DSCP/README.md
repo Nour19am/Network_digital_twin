@@ -11,6 +11,8 @@ In the Output/ folder you will find:
 - qdisc_dscp_2_nodes.xml: the flowmonitor trace for per-flow stats
 - qdisc-animation.xml: animation file to visualize using NetAnim
 - qdisc_dscp-0-0.pcap and qdisc_dscp-1-0.pcap: pcap files for per-packet stats
+
+  
 Parsing files:
 - n-qdisc_dscp_parse.ipynb enables parsing the output file to have two types of granularities: parsing of the pcap file using tshark gives statistics per-packet and per-flow statistics are given using the parsing of the .xml reading option of the flowmonitor file  
 
