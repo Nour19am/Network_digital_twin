@@ -1,7 +1,3 @@
-//each tos in one of the bands of the pfifo fast (3 queues)
-
-// maximize througput 0x08->2, normal service: 0x00 ->1, minimize delay: 0x10 ->0
-
 
 // adapted from example/traffic-control/traffic-control.cc
 //3 sockets per ToS value sending traffic on different ports in the sink
@@ -13,7 +9,6 @@
 //tshark -r qdisc_dscp-0-0.pcap  to count the number of packets generated
 //tshark -r qdisc_dscp-0-0.pcap -Y "ip.dsfield.dscp == 10 && tcp.len > 0" | wc -l //count number of packets with DSCP=10
 //echo $((0x2c5210)) //convert the size of transmitted packets to bytes
-//echo $((0x11& 0xf)) to check the tos correpsonds to which band according to the setup mapping of ns3 pfifo_fast queueing: according to the modulo
 
 //parameters to change to have packet drop: droptail maxsize, bandwidth of the p2p, data rate of the socket/app
 
@@ -29,28 +24,6 @@
   Mean jitter:   0.000472322
   DSCP value:   0x0  count:   4945
   */
-//other example when using 3 different classes in each queue
-  /*
-  *** Flow monitor statistics ***
-  Tx Packets/Bytes:   3922 / 2245804
-  Offered Load: 3.36223 Mbps
-  Rx Packets/Bytes:   3922 / 2245804
-  Packets/Bytes Dropped by Queue Disc:   0 / 0
-  Packets/Bytes Dropped by NetDevice:   0 / 0
-  Throughput: 3.34813 Mbps
-  Mean delay:   0.169527
-  Mean jitter:   0.000567929
-  Queue 0
-  DSCP value:   0x4  count:   3816
-The tos in hex is: 0x10
-  DSCP value:   0x0  count:   106
-The tos in hex is: 0x0
-  Queue 1
-  DSCP value:   0x0  count:   259
-The tos in hex is: 0x0
-  Queue 2
-  DSCP value:   0x2  count:   259
-The tos in hex is: 0x8*/
 #include "ns3/applications-module.h"
 #include "ns3/core-module.h"
 #include "ns3/flow-monitor-module.h"
@@ -60,20 +33,6 @@ The tos in hex is: 0x8*/
 #include "ns3/traffic-control-module.h"
 #include "ns3/netanim-module.h"
 #include <random>
-#include <iomanip>  // for hex formatting
-
-// Converts DSCP and ECN to a full 8-bit TOS byte
-uint8_t dscpToTos(uint8_t dscp, uint8_t ecn = 0) {
-    if (dscp > 63) {
-        std::cerr << "Error: DSCP value must be between 0 and 63.\n";
-        return 0;
-    }
-    if (ecn > 3) {
-        std::cerr << "Error: ECN value must be between 0 and 3.\n";
-        return 0;
-    }
-    return static_cast<uint8_t>((dscp << 2) | (ecn & 0x03));
-}
 using namespace ns3;
 /**
  * Number of packets in TX queue trace.
@@ -145,7 +104,7 @@ main(int argc, char* argv[])
     PointToPointHelper pointToPoint;
     pointToPoint.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
     pointToPoint.SetChannelAttribute("Delay", StringValue("2ms"));
-    pointToPoint.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("1p"));
+    pointToPoint.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("5p"));
 
     NetDeviceContainer devices;
     devices = pointToPoint.Install(nodes);
@@ -154,7 +113,7 @@ main(int argc, char* argv[])
     stack.Install(nodes);
 
     TrafficControlHelper tch;
-    tch.SetRootQueueDisc("ns3::PfifoFastQueueDisc");  // RedQueueDisc
+    tch.SetRootQueueDisc("ns3::RedQueueDisc");  //PfifoFastQueueDisc
     QueueDiscContainer qdiscs = tch.Install(devices);
 
     Ptr<QueueDisc> q = qdiscs.Get(1);
@@ -175,50 +134,58 @@ main(int argc, char* argv[])
     // Flow n1: sender  / source
           //n0: receiver/ sink
 
-    // Setting applications
-   ApplicationContainer sourceApplications, sinkApplications;
-   //complete tos list : tosValues_band1= {0x00,0x02,0x04,0x06,0x18,0x1a,0x1c,0x1e} //map to band1
-                    //   tosValues_band2= {0x08,0x0a,0x0c,0x0e}
-                    //   tosValues_band0= {0x10,0x12,0x14,0x16}
-    // maximize througput 0x08->2, normal service: 0x00 ->1, minimize delay: 0x10 ->0
-   std::vector<uint8_t> tosValues = {0x10, 0x00 ,0x08}; 
-   uint32_t portNumber = 8000;//for the sink
-   uint32_t payloadSize =1448 ; //for the source 1448
-   for (uint32_t index = 0; index < tosValues.size(); ++index)
-     {
-       for (uint8_t tosValue : tosValues)
-         {  
-            
-            //sink
-            auto ipv4 = nodes.Get (0)->GetObject<Ipv4> ();
-            const auto address = ipv4->GetAddress (1, 0).GetLocal ();
-            InetSocketAddress sinkSocket (address, portNumber++);
-            sinkSocket.SetTos (tosValue);
-            PacketSinkHelper packetSinkHelper(socketType, sinkSocket);
-            sinkApplications.Add (packetSinkHelper.Install (nodes.Get (0)));
-         
-
-          //source
-           OnOffHelper onOffHelper (socketType, sinkSocket);
-           onOffHelper.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-           onOffHelper.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-           onOffHelper.SetAttribute ("DataRate", StringValue("100Mbps"));
-           onOffHelper.SetAttribute ("PacketSize", UintegerValue(payloadSize)); //bytes
-           sourceApplications.Add (onOffHelper.Install (nodes.Get (1)));
-         
-         }
-     }
- 
-   sinkApplications.Start (Seconds (0.0));
-   sinkApplications.Stop (Seconds (simulationTime + 1));
-   sourceApplications.Start (Seconds (1.0));
-   sourceApplications.Stop (Seconds (simulationTime + 1));
-
-    
+    //sink app
   
-  
+   std::vector<uint8_t> dscpValues = {0x00, 0x28, 0xb8}; // Best Effort, AF, EF
+    for (size_t i = 0; i < dscpValues.size(); ++i) {
+        uint16_t port = 8000 + i; // unique port
+        PacketSinkHelper sinkHelper(socketType, InetSocketAddress(Ipv4Address::GetAny(), port));
+        ApplicationContainer sink = sinkHelper.Install(nodes.Get(0)); // node 0
+        sink.Start(Seconds(0.0));
+        sink.Stop(Seconds(simulationTime));
+    }
 
+
+    //sending app in the source node
+    uint32_t payloadSize =2000 ; //for the source 1448
+
+    uint16_t port = 8000; //for the sink
     
+    //Create 3 sockets for each ToS value and generate packets per each socket
+    
+    std::vector<ApplicationContainer> appContainers;
+
+    for (size_t i = 0; i < dscpValues.size(); ++i) {
+        //sending app in the source node
+        uint8_t tos = dscpValues[i];
+        std::cout << "The tos in hex is: 0x" << std::hex << static_cast<int>(tos) << std::endl;
+        // Create a new OnOff app
+        OnOffHelper onoff(socketType, Ipv4Address::GetAny());
+        /*
+        onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+        onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+        */
+        
+        
+        onoff.SetAttribute("OnTime", StringValue("ns3::ExponentialRandomVariable[Mean=1.0]"));
+        onoff.SetAttribute("OffTime", StringValue("ns3::ExponentialRandomVariable[Mean=0.5]"));
+        
+        onoff.SetAttribute("PacketSize", UintegerValue(payloadSize));
+        onoff.SetAttribute("DataRate", StringValue("80Mbps")); // bit/s
+
+        // Create a destination socket with specific ToS
+        InetSocketAddress rmt(interfaces.GetAddress(0), port + i); // Use different ports if needed
+        rmt.SetTos(tos);
+        onoff.SetAttribute("Remote", AddressValue(rmt));
+
+        // Install the app
+        ApplicationContainer app = onoff.Install(nodes.Get(1));  // senderNode is nodes.Get(1) in your case
+        app.Start(Seconds(1.0 + i)); // stagger start times
+        app.Stop(Seconds(simulationTime));
+
+        appContainers.push_back(app);
+    }
+
 
     AnimationInterface anim("qdisc-animation.xml");
      
@@ -279,34 +246,23 @@ main(int argc, char* argv[])
 
     //for each queue 
     //This function returns a map of DSCP values and their packet counts for queue number n
-    std::cout << "  Queue 0" <<std::endl;
     auto dscpVec = classifier->GetDscpCounts(1); //What DSCP values were enqueued to queue 1
     for (auto p : dscpVec)
     {
-        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec //
+        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec
                   << "  count:   " << p.second << std::endl;
-        
-        uint8_t tos = dscpToTos(p.first);  // ECN defaults to 0
-        std::cout << "The tos in hex is: 0x" << std::hex << static_cast<int>(tos) << std::endl;
-        
     }
-    std::cout << "  Queue 1" <<std::endl;
     auto dscpVec2 = classifier->GetDscpCounts(2);
     for (auto p : dscpVec2)
     {
-        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec 
+        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec
                   << "  count:   " << p.second << std::endl;
-        uint8_t tos = dscpToTos(p.first);  // ECN defaults to 0
-        std::cout << "The tos in hex is: 0x" << std::hex << static_cast<int>(tos) << std::endl;
     }
-    std::cout << "  Queue 2" <<std::endl;
     auto dscpVec3 = classifier->GetDscpCounts(3);
     for (auto p : dscpVec3)
     {
-        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec 
+        std::cout << "  DSCP value:   0x" << std::hex << static_cast<uint32_t>(p.first) << std::dec
                   << "  count:   " << p.second << std::endl;
-        uint8_t tos = dscpToTos(p.first);  // ECN defaults to 0
-        std::cout << "The tos in hex is: 0x" << std::hex << static_cast<int>(tos) << std::endl;
     }
     
     Simulator::Destroy();

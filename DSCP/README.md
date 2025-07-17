@@ -2,9 +2,8 @@ Simulation files:
 
 
 Based on traffic-control.cc (to impelement queues and generate traces), pfifo-fast-queue-disc-test-suite.cc (for DSCP marking), and wifi-multi-tos.cc (for different sockets attached to different tos values) provided in ns3's repo, we adapted and created those files:
-- n-dscp_test_unique.cc generates traffic through one socket attached to a TOS between 2 nodes (one flow)
-- n-dscp_test_mflow.cc creates 3 sockets attached to 3 different TOS between 2 nodes to use prioirty queues (3 different flows)
-- n-dscp-test_mflow_traces provides pcap files to parse with python using tshark for packets characteristics and flowmonitor file for flow characteristics. Also outputs metrics for the queues (overall dropped packets in queues or in NIC, throughput, sent packets per DSCP class)
+- n-dscp_mflow_traces.cc implements a pfifo_fast with 3 TOS-type packets (maximize througput 0x08->queue 2, normal service: 0x00 -> queue 1, minimize delay: 0x10 -> queue 0) to ensure & check that each TOS is going through the right queue. It outputs also stats about the queues (for now printed in the shell)
+
 
 Output files:
 In the Output/ folder you will find: 
@@ -25,3 +24,4 @@ Next: Add flow monitor and traces to:
 - provide csv file to the model
 - adapt code to complex topologies (to consider for later automatization)
 - explore wifi-multi-tos.cc to impelement correctly the TOS
+- add queues stats printed in the shell to the parsing file (.ipynb) from n-dscp_mflow_traces.cc
