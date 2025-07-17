@@ -1,7 +1,7 @@
 Simulation files:
 
 
-Based on traffic-control.cc (to impelement queues and generate traces), pfifo-fast-queue-disc-test-suite.cc (for DSCP marking), and wifi-multi-tos.cc (for different sockets attached to different tos values) provided in ns3's repo, we adapted and created those files:
+Based on example files provided in ns3's repo (under the ns3 helper examples/ directory), we adapted and created those files:
 - n-dscp_mflow_traces.cc implements a pfifo_fast with 3 TOS-type packets (maximize througput 0x08->queue 2, normal service: 0x00 -> queue 1, minimize delay: 0x10 -> queue 0) to ensure & check that each TOS is going through the right queue. It outputs also stats about the queues (for now printed in the shell)
 
 
