@@ -1,7 +1,7 @@
 This experiment is the continuation of the one on the 17-07 folder.
 
 
-**Simualtion file: **
+**Simualtion file:**
 
 - n-dscp_mflow_traces.cc
 
