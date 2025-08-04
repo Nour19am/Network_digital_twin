@@ -1,0 +1,2 @@
+flow_id,time_first_tx_s,time_first_rx_s,time_last_tx_s,time_last_rx_s,delay_sum_s,jitter_sum_s,last_delay_s,tx_bytes,rx_bytes,tx_packets,rx_packets,lost_packets,times_forwarded,duration,throughput_Mbps,src,dst,src_port,dst_port,protocol,mean_delay,mean-jitter,flow_5tuple
+1,1.5008000000000001,2.50288,9.9992,11.416500000000001,5384.9800000000005,5.385120000000001,1.41728,959872,522880,7499,4085,3414,0,9.915700000000001,0.4218602821787669,10.1.1.2,10.1.1.1,49153,9,17,1.318232558139535,0.0013182668298653611,10.1.1.2-10.1.1.1-49153-9-17
