@@ -1,0 +1,3 @@
+FlowID,SourceIP,DestinationIP,SourcePort,DestinationPort,Protocol,TxPackets,RxPackets,TxBytes,RxBytes,LostPackets,TimesForwarded,DelaySum_s,JitterSum_s,TimeFirstTx_s,TimeLastTx_s,TimeFirstRx_s,TimeLastRx_s,MeanDelay(s),MeanJitter(s),MeanTxPktSize(bytes),MeanRxPktSize(bytes),txDuration(s),rxDuration(s),MeanTxBitrate(bps),MeanRxBitrate(bps),MeanHopCount,PacketLossRatio
+1,10.1.1.1,10.1.1.2,49153,9,UDP,50,50,52600,52600,0,0,9.7516,0.336336,2,2.49,2.02686,2.8532,0.195032,0.006864,1052,1052,0.49,0.826336,858776,509236,1,0,
+2,10.1.1.2,10.1.1.1,9,49153,UDP,50,50,52600,52600,0,0,1.3432,0,2.02686,2.8532,2.05373,2.88006,0.026864,0,1052,1052,0.826336,0.826336,509236,509236,1,0,
