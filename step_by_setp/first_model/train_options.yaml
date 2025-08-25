@@ -1,0 +1,22 @@
+# PATHS
+train_dataset: ./datansfnet/train
+validation_dataset: ./datansfnet/eval
+predict_dataset: ./dataeval/train
+load_model_path: ./CheckPoint/experiment_2025_08_25_12_52_27/ckpt/weights.03-0.040 #./CheckPoint/<checkpoint_file>
+additional_functions_file: ./additional_functions.py
+output_path: ./
+
+# OPTIMIZATION OPTIONS
+loss: MeanSquaredError
+optimizer:
+  type: Adam
+metrics: [MeanAbsoluteError]
+
+# TRAINING OPTIONS
+batch_size: 16 #16
+epochs: 5 #100
+epoch_size: 100 #3000
+shuffle_training_set: True
+shuffle_validation_set: False
+val_samples: 10 #1000
+val_frequency: 1
